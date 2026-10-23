@@ -1,0 +1,270 @@
+:root {
+  --green: #14532d;
+  --green-light: #eaf5e8;
+  --cream: #fbf8ef;
+  --text: #263329;
+  --muted: #5b6b60;
+  --border: #d7e3d4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.55;
+}
+
+.hero {
+  padding: 38px 18px;
+  background: linear-gradient(135deg, #14532d, #287747);
+  color: white;
+  text-align: center;
+}
+
+.brand {
+  font-size: 1.15rem;
+  font-weight: bold;
+}
+
+.eyebrow {
+  margin-top: 30px;
+  color: #d9f99d;
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+h1 {
+  max-width: 800px;
+  margin: 10px auto;
+  font-size: clamp(2rem, 6vw, 3.3rem);
+  line-height: 1.15;
+}
+
+.notice {
+  display: inline-block;
+  padding: 7px 12px;
+  border: 1px solid #ffffff70;
+  border-radius: 8px;
+  background: #ffffff15;
+}
+
+main {
+  max-width: 950px;
+  margin: 25px auto;
+  padding: 0 15px;
+}
+
+.panel {
+  margin-bottom: 22px;
+  padding: 25px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 5px 20px #183b2010;
+}
+
+h2 {
+  margin-top: 0;
+  color: var(--green);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+}
+
+label {
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+input,
+select {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #bfcfba;
+  border-radius: 8px;
+  background: white;
+  color: var(--text);
+  font: inherit;
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin: 20px 0;
+}
+
+.checks label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+}
+
+.checks input {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+button {
+  min-height: 44px;
+  margin: 4px 4px 4px 0;
+  padding: 11px 17px;
+  border: 0;
+  border-radius: 9px;
+  background: #166534;
+  color: white;
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #14532d;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.secondary {
+  border: 1px solid var(--border);
+  background: #eef5eb;
+  color: var(--green);
+}
+
+.secondary:hover {
+  background: #dcebd8;
+}
+
+#search-message {
+  min-height: 24px;
+  overflow-wrap: anywhere;
+}
+
+.success {
+  color: #166534;
+}
+
+.error {
+  color: #b91c1c;
+  overflow-wrap: anywhere;
+}
+
+.room-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 15px;
+  margin-top: 18px;
+}
+
+.room-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fffefb;
+  overflow-wrap: anywhere;
+}
+
+.room-card h3 {
+  margin-top: 0;
+  color: var(--green);
+}
+
+.room-card p {
+  margin: 5px 0;
+}
+
+.room-card .total {
+  margin: 10px 0 14px;
+  color: var(--green);
+  font-size: 1.15rem;
+  font-weight: bold;
+}
+
+.room-card button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  padding: 16px;
+  border-radius: 10px;
+  background: #f0f5ed;
+}
+
+.selected-room {
+  padding: 12px;
+  border-left: 4px solid #166534;
+  border-radius: 5px;
+  background: var(--green-light);
+}
+
+.small {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #b8d7b1;
+  border-radius: 12px;
+  background: #f1faee;
+  overflow-wrap: anywhere;
+}
+
+.result h3 {
+  color: var(--green);
+}
+
+.booking-code {
+  display: inline-block;
+  padding: 9px 12px;
+  border: 1px dashed #6c9868;
+  border-radius: 8px;
+  background: white;
+  font-size: 1.15rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+footer {
+  padding: 20px;
+  color: var(--muted);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 650px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+}
