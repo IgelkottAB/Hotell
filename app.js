@@ -1,380 +1,450 @@
+
 (() => {
   "use strict";
 
-  const config = window.HOTEL_CONFIG || {};
-  const $ = (id) => document.getElementById(id);
+  const config = window.HOTEL_CONFIG;
 
-  let db = null;
-  let valtRum = null;
-  let sokning = null;
+  const elements = {
+    searchForm: document.getElementById("search-form"),
+    checkIn: document.getElementById("check-in"),
+    checkOut: document.getElementById("check-out"),
+    guestCount: document.getElementById("guest-count"),
+    balcony: document.getElementById("balcony"),
+    wheelchair: document.getElementById("wheelchair"),
+    searchButton: document.getElementById("search-button"),
+    searchMessage: document.getElementById("search-message"),
+    roomResults: document.getElementById("room-results"),
+    bookingPanel: document.getElementById("booking-panel"),
+    selectedRoom: document.getElementById("selected-room"),
+    bookingForm: document.getElementById("booking-form"),
+    guestName: document.getElementById("guest-name"),
+    guestEmail: document.getElementById("guest-email"),
+    paymentMethod: document.getElementById("payment-method"),
+    bookButton: document.getElementById("book-button"),
+    cancelSelection: document.getElementById("cancel-selection"),
+    bookingResult: document.getElementById("booking-result")
+  };
 
-  function datumStr(datum) {
-    const ar = datum.getFullYear();
-    const manad = String(datum.getMonth() + 1).padStart(2, "0");
-    const dag = String(datum.getDate()).padStart(2, "0");
-    return `${ar}-${manad}-${dag}`;
+  let supabaseClient = null;
+  let selectedRoom = null;
+  let latestSearch = 0;
+
+  function localDateString(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
-  function pengar(belopp) {
+  function addDays(dateString, numberOfDays) {
+    const date = new Date(`${dateString}T12:00:00`);
+    date.setDate(date.getDate() + numberOfDays);
+    return localDateString(date);
+  }
+
+  function setMessage(element, message, isError = false) {
+    element.textContent = message;
+    element.classList.toggle("error", isError);
+  }
+
+  function formatMoney(value) {
     return new Intl.NumberFormat("sv-SE", {
       style: "currency",
       currency: "SEK",
       maximumFractionDigits: 0
-    }).format(Number(belopp));
+    }).format(Number(value));
   }
 
-  function meddelande(id, text, typ = "") {
-    const element = $(id);
-    element.textContent = text;
-    element.className = typ;
+  function formatDate(dateString) {
+    const date = new Date(`${dateString}T12:00:00`);
+    return new Intl.DateTimeFormat("sv-SE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    }).format(date);
   }
 
-  function anslutSupabase() {
-    const url = config.SUPABASE_URL || "";
-    const nyckel = config.SUPABASE_PUBLISHABLE_KEY || "";
+  function countNights(checkIn, checkOut) {
+    const start = new Date(`${checkIn}T00:00:00Z`);
+    const end = new Date(`${checkOut}T00:00:00Z`);
+    return Math.round((end - start) / 86400000);
+  }
 
-    if (
-      !window.supabase ||
-      !url.startsWith("https://") ||
-      url.includes("KListra_IN") ||
-      nyckel.length < 20 ||
-      nyckel.includes("KListra_IN")
-    ) {
-      meddelande(
-        "search-message",
-        "Supabase är inte konfigurerat. Fyll i URL och nyckel i js/config.js.",
-        "error"
-      );
-
-      $("search-button").disabled = true;
-      $("book-button").disabled = true;
-      return;
+  function validateDates(checkIn, checkOut) {
+    if (!checkIn || !checkOut) {
+      return "Välj både incheckning och utcheckning.";
     }
 
-    db = window.supabase.createClient(url, nyckel);
+    const today = localDateString(new Date());
+    const nights = countNights(checkIn, checkOut);
+
+    if (checkIn < today) {
+      return "Incheckningen kan inte vara före dagens datum.";
+    }
+
+    if (nights < 1) {
+      return "Utcheckningen måste vara minst en dag efter incheckningen.";
+    }
+
+    if (nights > 365) {
+      return "Du kan söka efter vistelser på högst 365 nätter.";
+    }
+
+    return "";
   }
 
-  function startaDatum() {
-    const idag = new Date();
-    const incheckning = new Date(
-      idag.getFullYear(),
-      idag.getMonth(),
-      idag.getDate() + 1
-    );
-    const utcheckning = new Date(
-      idag.getFullYear(),
-      idag.getMonth(),
-      idag.getDate() + 2
-    );
+  function resetBooking() {
+    selectedRoom = null;
+    elements.bookingPanel.hidden = true;
+    elements.bookingResult.hidden = true;
+    elements.bookingResult.textContent = "";
+    elements.selectedRoom.textContent = "";
+  }
 
-    $("check-in").min = datumStr(idag);
-    $("check-in").value = datumStr(incheckning);
-    $("check-out").min = datumStr(
-      new Date(
-        incheckning.getFullYear(),
-        incheckning.getMonth(),
-        incheckning.getDate() + 1
-      )
-    );
-    $("check-out").value = datumStr(utcheckning);
+  function showBookingRoom(room) {
+    selectedRoom = room;
 
-    $("check-in").addEventListener("change", () => {
-      const valt = $("check-in").value;
-      if (!valt) return;
+    const checkIn = elements.checkIn.value;
+    const checkOut = elements.checkOut.value;
+    const nights = countNights(checkIn, checkOut);
 
-      const nastaDag = new Date(valt + "T12:00:00");
-      nastaDag.setDate(nastaDag.getDate() + 1);
+    elements.selectedRoom.replaceChildren();
 
-      $("check-out").min = datumStr(nastaDag);
+    const title = document.createElement("h3");
+    title.textContent = `${room.room_type} – rum ${room.room_number}`;
 
-      if ($("check-out").value <= valt) {
-        $("check-out").value = datumStr(nastaDag);
-      }
+    const details = document.createElement("p");
+    details.textContent =
+      `${formatDate(checkIn)} till ${formatDate(checkOut)} · ` +
+      `${nights} nätter · ${elements.guestCount.value} gäster`;
+
+    const price = document.createElement("p");
+    price.textContent = `Totalt: ${formatMoney(room.total_price)}`;
+
+    elements.selectedRoom.append(title, details, price);
+    elements.bookingPanel.hidden = false;
+    elements.bookingResult.hidden = true;
+    elements.bookingPanel.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
     });
   }
 
-  function visaRum(rum) {
-    const lista = $("room-results");
-    lista.replaceChildren();
+  function createRoomCard(room) {
+    const card = document.createElement("article");
+    card.className = "room-card";
 
-    if (!rum.length) {
-      const tomt = document.createElement("p");
-      tomt.className = "empty";
-      tomt.textContent =
-        "Inga lediga rum hittades. Prova andra datum eller ändra filtren.";
-      lista.appendChild(tomt);
+    const title = document.createElement("h3");
+    title.textContent = room.room_type || "Hotellrum";
+
+    const number = document.createElement("p");
+    number.className = "room-number";
+    number.textContent = `Rum ${room.room_number}`;
+
+    const description = document.createElement("p");
+    description.textContent = room.description || "Beskrivning saknas.";
+
+    const features = document.createElement("p");
+    const featureList = [
+      `${room.capacity} bäddar`,
+      room.has_balcony ? "Balkong" : "Ingen balkong",
+      room.wheelchair_accessible
+        ? "Rullstolsanpassat"
+        : "Inte rullstolsanpassat"
+    ];
+    features.textContent = featureList.join(" · ");
+
+    const price = document.createElement("p");
+    price.className = "room-price";
+
+    const pricePerNight = document.createElement("span");
+    pricePerNight.textContent =
+      `${formatMoney(room.price_per_night)} `;
+
+    const perNight = document.createElement("small");
+    perNight.textContent = "/ natt";
+
+    const total = document.createElement("p");
+    total.textContent =
+      `Totalt för vistelsen: ${formatMoney(room.total_price)}`;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Välj detta rum";
+    button.addEventListener("click", () => showBookingRoom(room));
+
+    price.append(pricePerNight, perNight);
+    card.append(title, number, description, features, price, total, button);
+
+    return card;
+  }
+
+  async function searchRooms(event) {
+    event.preventDefault();
+
+    const validation = validateDates(
+      elements.checkIn.value,
+      elements.checkOut.value
+    );
+
+    if (validation) {
+      setMessage(elements.searchMessage, validation, true);
       return;
     }
 
-    rum.forEach((rumInfo) => {
-      const kort = document.createElement("article");
-      kort.className = "room-card";
+    if (!supabaseClient) {
+      setMessage(
+        elements.searchMessage,
+        "Supabase är inte konfigurerat. Kontrollera js/config.js.",
+        true
+      );
+      return;
+    }
 
-      const rubrik = document.createElement("h3");
-      rubrik.textContent =
-        `Rum ${rumInfo.room_number} – ${rumInfo.room_type}`;
+    const searchId = ++latestSearch;
 
-      const beskrivning = document.createElement("p");
-      beskrivning.textContent =
-        rumInfo.description || "Rum på hotellet.";
+    resetBooking();
+    elements.roomResults.replaceChildren();
+    elements.searchButton.disabled = true;
+    setMessage(elements.searchMessage, "Söker efter lediga rum…");
 
-      const egenskaper = document.createElement("p");
-      egenskaper.textContent = [
-        `Plats för ${rumInfo.capacity} gäster`,
-        rumInfo.has_balcony ? "Balkong" : "Ingen balkong",
-        rumInfo.wheelchair_accessible
-          ? "Rullstolsanpassat"
-          : "Ej rullstolsanpassat"
-      ].join(" · ");
+    try {
+      const { data, error } = await supabaseClient.rpc(
+        "search_hotel_rooms",
+        {
+          p_hotel_id: config.HOTEL_ID,
+          p_check_in: elements.checkIn.value,
+          p_check_out: elements.checkOut.value,
+          p_guest_count: Number(elements.guestCount.value),
+          p_needs_balcony: elements.balcony.checked,
+          p_needs_wheelchair_access: elements.wheelchair.checked
+        }
+      );
 
-      const nattpris = document.createElement("p");
-      nattpris.textContent =
-        `${pengar(rumInfo.price_per_night)} per natt`;
+      if (searchId !== latestSearch) return;
+
+      if (error) throw error;
+
+      const rooms = Array.isArray(data) ? data : [];
+
+      if (rooms.length === 0) {
+        setMessage(
+          elements.searchMessage,
+          "Inga lediga rum hittades. Prova andra datum eller ändra dina val."
+        );
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+
+      rooms.forEach((room) => {
+        fragment.appendChild(createRoomCard(room));
+      });
+
+      elements.roomResults.appendChild(fragment);
+      setMessage(
+        elements.searchMessage,
+        `Vi hittade ${rooms.length} lediga rum.`
+      );
+    } catch (error) {
+      console.error("Sökfel:", error);
+      setMessage(
+        elements.searchMessage,
+        error.message || "Sökningen misslyckades. Försök igen.",
+        true
+      );
+    } finally {
+      if (searchId === latestSearch) {
+        elements.searchButton.disabled = false;
+      }
+    }
+  }
+
+  async function createBooking(event) {
+    event.preventDefault();
+
+    if (!selectedRoom) {
+      setMessage(
+        elements.bookingResult,
+        "Välj ett rum först.",
+        true
+      );
+      elements.bookingResult.hidden = false;
+      return;
+    }
+
+    const name = elements.guestName.value.trim();
+    const email = elements.guestEmail.value.trim();
+
+    if (!name || !email) {
+      setMessage(
+        elements.bookingResult,
+        "Fyll i namn och e-postadress.",
+        true
+      );
+      elements.bookingResult.hidden = false;
+      return;
+    }
+
+    if (!supabaseClient) {
+      setMessage(
+        elements.bookingResult,
+        "Supabase är inte konfigurerat.",
+        true
+      );
+      elements.bookingResult.hidden = false;
+      return;
+    }
+
+    elements.bookButton.disabled = true;
+    elements.bookingResult.hidden = false;
+    elements.bookingResult.className = "result";
+    setMessage(elements.bookingResult, "Skapar bokningen…");
+
+    try {
+      const { data, error } = await supabaseClient.rpc(
+        "create_hotel_booking",
+        {
+          p_hotel_id: config.HOTEL_ID,
+          p_room_id: selectedRoom.id,
+          p_guest_name: name,
+          p_guest_email: email,
+          p_guest_count: Number(elements.guestCount.value),
+          p_check_in: elements.checkIn.value,
+          p_check_out: elements.checkOut.value,
+          p_payment_method: elements.paymentMethod.value
+        }
+      );
+
+      if (error) throw error;
+
+      const booking = Array.isArray(data) ? data[0] : data;
+
+      if (!booking || !booking.booking_code) {
+        throw new Error(
+          "Bokningen skapades, men servern returnerade ingen bokningskod."
+        );
+      }
+
+      const nights = Number(booking.nights);
+      const totalPrice = Number(booking.total_price);
+
+      elements.bookingResult.replaceChildren();
+      elements.bookingResult.className = "result success";
+
+      const heading = document.createElement("h3");
+      heading.textContent = "Bokningen är skapad!";
+
+      const codeLabel = document.createElement("p");
+      codeLabel.textContent = "Din bokningskod:";
+
+      const code = document.createElement("p");
+      code.className = "booking-code";
+      code.textContent = booking.booking_code;
 
       const total = document.createElement("p");
-      total.className = "total";
-      total.textContent =
-        `Totalt ${pengar(rumInfo.total_price)} för ` +
-        `${sokning.natter} ${sokning.natter === 1 ? "natt" : "nätter"}`;
+      total.textContent = `Totalpris: ${formatMoney(totalPrice)}`;
 
-      const knapp = document.createElement("button");
-      knapp.type = "button";
-      knapp.textContent = "Välj detta rum";
-      knapp.addEventListener("click", () => valjRum(rumInfo));
+      const nightText = document.createElement("p");
+      nightText.textContent = `Antal nätter: ${nights}`;
 
-      kort.append(
-        rubrik,
-        beskrivning,
-        egenskaper,
-        nattpris,
-        total,
-        knapp
+      const status = document.createElement("p");
+      status.textContent =
+        booking.status === "confirmed"
+          ? "Status: Bekräftad. Betalning sker på hotellet."
+          : `Status: ${booking.status}.`;
+
+      const reminder = document.createElement("p");
+      reminder.textContent =
+        "Spara bokningskoden. Den här testversionen skickar inte e-postkvitton.";
+
+      elements.bookingResult.append(
+        heading, codeLabel, code, total, nightText, status, reminder
       );
 
-      lista.appendChild(kort);
-    });
-  }
+      elements.bookingForm.reset();
+      elements.bookButton.textContent = "Bokning skapad";
 
-  function valjRum(rum) {
-    valtRum = rum;
-
-    $("selected-room").textContent =
-      `Rum ${rum.room_number} – ${rum.room_type}. ` +
-      `Totalt ${pengar(rum.total_price)} för ${sokning.natter} nätter.`;
-
-    $("booking-panel").hidden = false;
-    $("booking-result").hidden = true;
-
-    $("booking-panel").scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  }
-
-  $("search-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!db) return;
-
-    const incheckning = $("check-in").value;
-    const utcheckning = $("check-out").value;
-    const antalGaster = Number($("guest-count").value);
-
-    if (!incheckning || !utcheckning || utcheckning <= incheckning) {
-      meddelande(
-        "search-message",
-        "Utcheckningen måste vara efter incheckningen.",
-        "error"
-      );
-      return;
-    }
-
-    const idag = datumStr(new Date());
-
-    if (incheckning < idag) {
-      meddelande(
-        "search-message",
-        "Du kan inte välja ett datum som redan har passerat.",
-        "error"
-      );
-      return;
-    }
-
-    const start = new Date(incheckning + "T12:00:00");
-    const slut = new Date(utcheckning + "T12:00:00");
-    const natter = Math.round((slut - start) / 86400000);
-
-    if (natter > 365) {
-      meddelande(
-        "search-message",
-        "Du kan söka högst 365 nätter åt gången.",
-        "error"
-      );
-      return;
-    }
-
-    sokning = {
-      incheckning,
-      utcheckning,
-      antalGaster,
-      natter
-    };
-
-    valtRum = null;
-    $("booking-panel").hidden = true;
-    $("room-results").replaceChildren();
-
-    const knapp = $("search-button");
-    knapp.disabled = true;
-    knapp.textContent = "Söker…";
-
-    meddelande("search-message", "Kontrollerar lediga rum…");
-
-    try {
-      const { data, error } = await db.rpc("search_hotel_rooms", {
-        p_hotel_id: config.HOTEL_ID,
-        p_check_in: incheckning,
-        p_check_out: utcheckning,
-        p_guest_count: antalGaster,
-        p_needs_balcony: $("balcony").checked,
-        p_needs_wheelchair_access: $("wheelchair").checked
-      });
-
-      if (error) throw error;
-
-      const rum = Array.isArray(data) ? data : [];
-
-      meddelande(
-        "search-message",
-        `Sökningen är klar. Hittade ${rum.length} rum.`,
-        "success"
-      );
-
-      visaRum(rum);
-    } catch (fel) {
-      console.error(fel);
-      meddelande(
-        "search-message",
-        "Sökningen misslyckades: " + fel.message,
-        "error"
+      // Uppdatera listan eftersom rummet nu kan vara upptaget.
+      await searchRooms(new Event("submit", { cancelable: true }));
+    } catch (error) {
+      console.error("Bokningsfel:", error);
+      elements.bookingResult.className = "result error";
+      setMessage(
+        elements.bookingResult,
+        error.message ||
+          "Bokningen kunde inte skapas. Kontrollera datumen och försök igen.",
+        true
       );
     } finally {
-      knapp.disabled = false;
-      knapp.textContent = "Sök lediga rum";
+      elements.bookButton.disabled = false;
+      elements.bookButton.textContent = "Skapa bokning";
     }
-  });
+  }
 
-  $("booking-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
+  function initialize() {
+    const today = localDateString(new Date());
+    elements.checkIn.min = today;
+    elements.checkIn.value = addDays(today, 1);
+    elements.checkOut.min = addDays(today, 2);
+    elements.checkOut.value = addDays(today, 2);
 
-    if (!db || !valtRum || !sokning) {
-      meddelande(
-        "booking-result",
-        "Sök rum och välj ett rum innan du bokar.",
-        "error"
-      );
-      $("booking-result").hidden = false;
-      return;
-    }
+    elements.checkIn.addEventListener("change", () => {
+      const nextDay = addDays(elements.checkIn.value, 1);
+      elements.checkOut.min = nextDay;
 
-    const namn = $("guest-name").value.trim();
-    const epost = $("guest-email").value.trim();
-
-    if (namn.length < 2 || !epost.includes("@")) {
-      const resultat = $("booking-result");
-      resultat.hidden = false;
-      resultat.textContent = "Kontrollera namn och e-postadress.";
-      resultat.className = "result error";
-      return;
-    }
-
-    const knapp = $("book-button");
-    knapp.disabled = true;
-    knapp.textContent = "Skapar bokning…";
-    $("booking-result").hidden = true;
-
-    try {
-      const { data, error } = await db.rpc("create_hotel_booking", {
-        p_hotel_id: config.HOTEL_ID,
-        p_room_id: valtRum.room_id,
-        p_guest_name: namn,
-        p_guest_email: epost,
-        p_guest_count: sokning.antalGaster,
-        p_check_in: sokning.incheckning,
-        p_check_out: sokning.utcheckning,
-        p_payment_method: $("payment-method").value
-      });
-
-      if (error) throw error;
-
-      const bokning = Array.isArray(data) ? data[0] : data;
-
-      if (!bokning || !bokning.booking_code) {
-        throw new Error("Bokningsnumret saknas i svaret från Supabase.");
+      if (elements.checkOut.value <= elements.checkIn.value) {
+        elements.checkOut.value = nextDay;
       }
-
-      const resultat = $("booking-result");
-      resultat.replaceChildren();
-      resultat.hidden = false;
-      resultat.className = "result";
-
-      const rubrik = document.createElement("h3");
-      rubrik.textContent = "Testbokningen är skapad!";
-
-      const kod = document.createElement("p");
-      kod.className = "booking-code";
-      kod.textContent = "Bokningsnummer: " + bokning.booking_code;
-
-      const detaljer = document.createElement("p");
-      detaljer.textContent =
-        `Rum ${valtRum.room_number} · ${sokning.incheckning} till ` +
-        `${sokning.utcheckning} · ${bokning.nights} nätter · ` +
-        `${pengar(bokning.total_price)} totalt.`;
-
-      const betalning = document.createElement("p");
-      betalning.textContent = bokning.payment_status === "unpaid"
-        ? "Betalning: betalas på hotellet. Detta är ett test."
-        : "Betalning: väntar på låtsasbetalning. Inga pengar har dragits.";
-
-      const varning = document.createElement("p");
-      varning.className = "small";
-      varning.textContent =
-        "Spara bokningsnumret. E-postbekräftelse är inte aktiverad ännu.";
-
-      resultat.append(rubrik, kod, detaljer, betalning, varning);
-
-      meddelande(
-        "search-message",
-        "Bokningen lyckades! Sök igen för att uppdatera listan.",
-        "success"
-      );
-
-      resultat.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
-    } catch (fel) {
-      console.error(fel);
-      const resultat = $("booking-result");
-      resultat.hidden = false;
-      resultat.className = "result error";
-      resultat.textContent =
-        "Bokningen misslyckades: " + fel.message +
-        ". Sök lediga rum igen och försök på nytt.";
-    } finally {
-      knapp.disabled = false;
-      knapp.textContent = "Skapa testbokning";
-    }
-  });
-
-  $("cancel-selection").addEventListener("click", () => {
-    $("booking-panel").hidden = true;
-    valtRum = null;
-    $("search-form").scrollIntoView({
-      behavior: "smooth",
-      block: "start"
     });
-  });
 
-  startaDatum();
-  anslutSupabase();
+    elements.searchForm.addEventListener("submit", searchRooms);
+    elements.bookingForm.addEventListener("submit", createBooking);
+
+    elements.cancelSelection.addEventListener("click", () => {
+      resetBooking();
+      elements.roomResults.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+
+    if (
+      !config ||
+      !config.SUPABASE_URL ||
+      !config.SUPABASE_ANON_KEY ||
+      config.SUPABASE_URL.includes("KListra_IN") ||
+      config.SUPABASE_ANON_KEY.includes("KListra_IN")
+    ) {
+      setMessage(
+        elements.searchMessage,
+        "Fyll i Supabase-adressen och nyckeln i js/config.js.",
+        true
+      );
+      elements.searchButton.disabled = true;
+      return;
+    }
+
+    if (!window.supabase || !window.supabase.createClient) {
+      setMessage(
+        elements.searchMessage,
+        "Supabase-biblioteket kunde inte laddas. Kontrollera internetanslutningen.",
+        true
+      );
+      elements.searchButton.disabled = true;
+      return;
+    }
+
+    supabaseClient = window.supabase.createClient(
+      config.SUPABASE_URL,
+      config.SUPABASE_ANON_KEY
+    );
+
+    setMessage(
+      elements.searchMessage,
+      "Välj datum och tryck på Sök lediga rum."
+    );
+  }
+
+  initialize();
 })();
