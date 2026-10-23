@@ -1,102 +1,58 @@
+
 <!doctype html>
 <html lang="sv">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Boka rum – Igelkotts Hotel Hässleholm</title>
+  <title>Igelkotts Hotellkedja</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script src="app.js" defer></script>
 </head>
 <body>
   <header class="hero">
     <p class="brand">🦔 Igelkotts Hotellkedja</p>
     <p class="eyebrow">VÅRT FÖRSTA TESTHOTELL</p>
     <h1>Igelkotts Hotel Hässleholm</h1>
-    <p>Hitta ett rum som passar dig och boka din vistelse.</p>
-    <p class="notice">TESTVERSION – inga riktiga betalningar görs.</p>
-    <p>Incheckning: <strong>15.00</strong> · Utcheckning: <strong>11.00</strong></p>
+    <p>Välkommen till vårt första hotell!</p>
+    <p class="notice">TESTVERSION – inga riktiga betalningar.</p>
+    <p>Incheckning 15.00 · Utcheckning 11.00</p>
   </header>
 
-  <main>
-    <section class="panel">
-      <h2>1. Sök lediga rum</h2>
-
-      <form id="search-form">
-        <div class="form-grid">
-          <label>Incheckning
-            <input id="check-in" type="date" required>
-          </label>
-
-          <label>Utcheckning
-            <input id="check-out" type="date" required>
-          </label>
-
-          <label>Antal gäster
-            <select id="guest-count">
-              <option value="1">1 gäst</option>
-              <option value="2" selected>2 gäster</option>
-              <option value="3">3 gäster</option>
-              <option value="4">4 gäster</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="checks">
-          <label><input id="balcony" type="checkbox"> Jag vill ha balkong</label>
-          <label><input id="wheelchair" type="checkbox"> Jag behöver rullstolsanpassning</label>
-        </div>
-
-        <button id="search-button" type="submit">Sök lediga rum</button>
-      </form>
-
-      <p id="search-message" role="status"></p>
-      <div id="room-results" class="room-list"></div>
-    </section>
-
-    <section class="panel" id="booking-panel" hidden>
-      <h2>2. Boka ditt rum</h2>
-      <p id="selected-room" class="selected-room"></p>
-
-      <form id="booking-form">
-        <div class="form-grid">
-          <label>För- och efternamn
-            <input id="guest-name" type="text" maxlength="100" required>
-          </label>
-
-          <label>E-postadress
-            <input id="guest-email" type="email" maxlength="254" required>
-          </label>
-
-          <label>Betalning
-            <select id="payment-method">
-              <option value="pay_at_hotel">Betala på hotellet</option>
-              <option value="simulated_online">Testa låtsasbetalning online</option>
-            </select>
-          </label>
-        </div>
-
-        <p class="small">
-          Låtsasbetalningen är bara ett test. Skriv aldrig in riktiga kortuppgifter.
-        </p>
-
-        <button id="book-button" type="submit">Skapa testbokning</button>
-        <button id="cancel-selection" class="secondary" type="button">
-          Välj ett annat rum
-        </button>
-      </form>
-
-      <div id="booking-result" class="result" role="status" hidden></div>
-    </section>
-
-    <section class="panel">
+  <main class="cards">
+    <a class="nav-card" href="hotell.html">
+      <span>🏨</span>
       <h2>Om hotellet</h2>
-      <p>
-        Igelkotts Hotel Hässleholm ligger i Hässleholm i Skåne.
-        Rummen och priserna är exempel för att testa bokningssystemet.
-      </p>
-    </section>
+      <p>Information om hotellet och rummen.</p>
+    </a>
+
+    <a class="nav-card" href="bokning.html">
+      <span>🛏️</span>
+      <h2>Boka rum</h2>
+      <p>Sök lediga rum och gör en testbokning.</p>
+    </a>
+
+    <a class="nav-card" href="min-bokning.html">
+      <span>🎫</span>
+      <h2>Min bokning</h2>
+      <p>Information om dina bokningar.</p>
+    </a>
+
+    <a class="nav-card" href="room-service.html">
+      <span>🛎️</span>
+      <h2>Room service</h2>
+      <p>Hotellets beställningsservice.</p>
+    </a>
+
+    <a class="nav-card" href="personal.html">
+      <span>🧹</span>
+      <h2>Personal</h2>
+      <p>Personalens arbetsyta.</p>
+    </a>
+
+    <a class="nav-card" href="admin.html">
+      <span>⚙️</span>
+      <h2>Administration</h2>
+      <p>Hantera hotellet.</p>
+    </a>
   </main>
 
   <footer>Igelkotts Hotellkedja · Testversion</footer>
