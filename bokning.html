@@ -1,0 +1,46 @@
+
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Boka rum – Igelkotts Hotel Hässleholm</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js"></script>
+<script src="js/booking.js" defer></script>
+</head>
+<body>
+<header class="topbar"><a href="index.html">🦔 Igelkotts Hotellkedja</a><a href="hotell.html">Om hotellet</a></header>
+<main class="narrow">
+<section class="panel">
+<h1>Boka rum</h1>
+<p class="notice">Testversion. Ange aldrig riktiga kortuppgifter.</p>
+<form id="search-form">
+<div class="form-grid">
+<label>Incheckning<input id="check-in" type="date" required></label>
+<label>Utcheckning<input id="check-out" type="date" required></label>
+<label>Antal gäster<select id="guest-count"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></label>
+</div>
+<div class="checks">
+<label><input id="balcony" type="checkbox"> Balkong</label>
+<label><input id="wheelchair" type="checkbox"> Rullstolsanpassat</label>
+</div>
+<button type="submit">Sök lediga rum</button>
+</form>
+<p id="search-message" role="status"></p><div id="room-results" class="room-list"></div>
+</section>
+<section class="panel" id="booking-panel" hidden>
+<h2>Boka valt rum</h2><p id="selected-room" class="selected-room"></p>
+<form id="booking-form">
+<label>För- och efternamn<input id="guest-name" maxlength="100" required></label>
+<label>E-postadress<input id="guest-email" type="email" maxlength="254" required></label>
+<label>Betalningssätt<select id="payment-method"><option value="pay_at_hotel">Betala på hotellet (test)</option><option value="simulated_online">Låtsasbetalning online</option></select></label>
+<p class="small">Ingen riktig betalning utförs.</p>
+<button type="submit">Skapa testbokning</button>
+<button id="cancel-selection" class="secondary" type="button">Välj annat rum</button>
+</form>
+<div id="booking-result" class="result" role="status" hidden></div>
+</section>
+<p><a href="index.html">← Startsidan</a></p>
+</main><footer>Testversion</footer>
+</body></html>
