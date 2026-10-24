@@ -1,0 +1,1 @@
+const {$,rpc,safe,status}=H;$("service").onsubmit=safe(async()=>{let id=await rpc("ih_create_service_request",{p_code:$("code").value.trim(),p_email:$("email").value.trim(),p_kind:$("kind").value,p_notes:$("notes").value.trim()});status("msg",`Beställningen registrerades. Ärendenummer: ${id}`);$("notes").value=""});

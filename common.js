@@ -1,17 +1,1 @@
-
-document.addEventListener("DOMContentLoaded", () => {
-  const cfg = window.HOTEL_CONFIG;
-  const configured = cfg &&
-    cfg.SUPABASE_URL &&
-    cfg.SUPABASE_PUBLISHABLE_KEY &&
-    !cfg.SUPABASE_URL.includes("KListra_") &&
-    !cfg.SUPABASE_PUBLISHABLE_KEY.includes("KListra_");
-
-  if (!configured) {
-    const warning = document.createElement("p");
-    warning.className = "notice";
-    warning.textContent =
-      "Supabase är inte konfigurerat. Kontrollera js/config.js.";
-    document.querySelector("main")?.prepend(warning);
-  }
-});
+window.H=(function(){const c=window.HOTEL_CONFIG;const ok=c&&/^https:\/\/.+\.supabase\.co\/?$/.test(c.url)&&c.key&&!c.key.startsWith("DIN_")&&window.supabase;const db=ok?window.supabase.createClient(c.url,c.key):null;const $=id=>document.getElementById(id);const money=x=>new Intl.NumberFormat("sv-SE",{style:"currency",currency:"SEK"}).format(Number(x));const today=()=>{let d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};const add=(s,n)=>{let d=new Date(s+"T12:00:00");d.setDate(d.getDate()+n);return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};const status=(id,t,bad=false)=>{const e=$(id);e.textContent=t;e.className="status "+(bad?"error":"success")};const el=(tag,t)=>{let e=document.createElement(tag);if(t!==undefined)e.textContent=String(t??"");return e};const rpc=async(name,args)=>{if(!db)throw Error("Fyll i projektets Supabase URL och publishable key i js/config.js.");const {data,error}=await db.rpc(name,args);if(error)throw error;return data};const safe=fn=>async e=>{e?.preventDefault();try{await fn(e)}catch(x){console.error(x);alert(x.message||String(x))}};return{c,db,$,money,today,add,status,el,rpc,safe}})();

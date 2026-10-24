@@ -1,15 +1,1 @@
-
-<!doctype html>
-<html lang="sv">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Administration</title><link rel="stylesheet" href="style.css"></head>
-<body>
-<header class="topbar"><a href="index.html">🦔 Igelkotts Hotellkedja</a><span>Administration</span></header>
-<main class="narrow"><section class="panel">
-<h1>Hotelladministration</h1>
-<p class="notice">Administrationsfunktionerna är inte aktiverade. Ingen säker inloggning finns här ännu.</p>
-<h2>Planerade funktioner</h2>
-<ul><li>Beläggningskalender</li><li>Hantera rum och priser</li><li>Bokningsöversikt</li><li>Personal och behörigheter</li><li>Inventering</li><li>Gästmeddelanden och rapporter</li><li>Kvitton och statistik</li></ul>
-<p>Riktiga administrationsåtgärder måste skyddas av serverkontroller, inte bara av en dold webbsida.</p>
-</section><p><a href="index.html">← Startsidan</a></p></main>
-<footer>Testversion</footer>
-</body></html>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Administration – Igelkotts Hotellkedja</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/admin.js" defer></script></head><body><header><p>🦔 Igelkotts Hotellkedja</p><h1>Administration</h1><nav><a href="index.html">Boka rum</a><a href="min-bokning.html">Min bokning</a><a href="room-service.html">Rumsservice</a><a href="personal.html">Personal</a><a href="admin.html">Administration</a></nav></header><main><p class="notice">TESTSYSTEM – ingen riktig betalning eller verklig hotellverksamhet. Använd testuppgifter.</p><section id="login"><h2>Administratör</h2><form id="signIn"><label>E-post<input id="email" type="email" required></label><label>Lösenord<input id="password" type="password" required></label><button>Logga in</button></form><p id="loginMsg"></p></section><section id="panel" hidden><button id="logout" class="secondary">Logga ut</button><h2>Hotell och rum</h2><form id="hotelForm"><label>Hotellnamn<input id="hotelName" required maxlength="120"></label><label>Beskrivning<textarea id="hotelDescription" maxlength="1000"></textarea></label><button>Spara hotell</button></form><h3>Rumspriser och tillgänglighet</h3><div id="rooms"></div><h3>Översikt</h3><div id="stats"></div><p id="msg"></p></section></main><footer>Igelkotts Hotel Hässleholm · Testversion</footer></body></html>

@@ -1,15 +1,1 @@
-
-<!doctype html>
-<html lang="sv">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Personal</title><link rel="stylesheet" href="style.css"></head>
-<body>
-<header class="topbar"><a href="index.html">🦔 Igelkotts Hotellkedja</a><span>Personal</span></header>
-<main class="narrow"><section class="panel">
-<h1>Personalens arbetsyta</h1>
-<p class="notice">Det här är en skiss. Logga inte in eller skriv in personuppgifter här.</p>
-<h2>Arbetslistor som ska kopplas till databasen</h2>
-<ul><li>Room-service-beställningar</li><li>Städning och Stör ej</li><li>Rena lakan och handdukar</li><li>Felanmälningar</li><li>Inventering av förbrukningsvaror</li></ul>
-<p>Innan sidan används måste personalinloggning och behörigheter kontrolleras på serversidan.</p>
-</section><p><a href="index.html">← Startsidan</a></p></main>
-<footer>Testversion</footer>
-</body></html>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Personal – Igelkotts Hotellkedja</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/staff.js" defer></script></head><body><header><p>🦔 Igelkotts Hotellkedja</p><h1>Personal</h1><nav><a href="index.html">Boka rum</a><a href="min-bokning.html">Min bokning</a><a href="room-service.html">Rumsservice</a><a href="personal.html">Personal</a><a href="admin.html">Administration</a></nav></header><main><p class="notice">TESTSYSTEM – ingen riktig betalning eller verklig hotellverksamhet. Använd testuppgifter.</p><section id="login"><h2>Personalinloggning</h2><p>Använd ett Supabase Auth-konto som administratören kopplat till hotellet. Skapa inte konton öppet på denna sida.</p><form id="signIn"><label>E-post<input id="email" type="email" required></label><label>Lösenord<input id="password" type="password" required></label><button>Logga in</button></form><p id="loginMsg"></p></section><section id="work" hidden><button id="logout" class="secondary">Logga ut</button><h2>Reception och arbetsuppgifter</h2><button id="refresh">Uppdatera</button><p id="msg"></p><h3>Bokningar</h3><div id="bookings"></div><h3>Serviceärenden</h3><div id="requests"></div><h3>Rum och städstatus</h3><div id="rooms"></div></section></main><footer>Igelkotts Hotel Hässleholm · Testversion</footer></body></html>

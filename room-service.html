@@ -1,15 +1,1 @@
-
-<!doctype html>
-<html lang="sv">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Room service</title><link rel="stylesheet" href="style.css"></head>
-<body>
-<header class="topbar"><a href="index.html">🦔 Igelkotts Hotellkedja</a><span>Room service</span></header>
-<main class="narrow"><section class="panel">
-<h1>Room service</h1>
-<p>Den här sidan är tänkt att nås via en QR-kod i gästens rum.</p>
-<p class="notice">Beställningar är inte aktiverade. Systemet måste först verifiera en aktiv vistelse.</p>
-<h2>Planerade funktioner</h2>
-<ul><li>Beställa mat och dryck</li><li>Begära städning</li><li>Beställa rena lakan och handdukar</li><li>Begära extra saker till rummet</li><li>Meddela receptionen</li></ul>
-</section><p><a href="index.html">← Startsidan</a></p></main>
-<footer>Testversion</footer>
-</body></html>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rumsservice – Igelkotts Hotellkedja</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/service.js" defer></script></head><body><header><p>🦔 Igelkotts Hotellkedja</p><h1>Rumsservice</h1><nav><a href="index.html">Boka rum</a><a href="min-bokning.html">Min bokning</a><a href="room-service.html">Rumsservice</a><a href="personal.html">Personal</a><a href="admin.html">Administration</a></nav></header><main><p class="notice">TESTSYSTEM – ingen riktig betalning eller verklig hotellverksamhet. Använd testuppgifter.</p><section><h2>Beställ service till ditt rum</h2><p>Identifiera bokningen med bokningskod och samma e-postadress som vid bokningen. Endast incheckade gäster kan skicka en beställning.</p><form id="service"><label>Bokningskod<input id="code" required></label><label>E-post<input id="email" type="email" required></label><label>Vad behöver du?<select id="kind"><option value="cleaning">Städning</option><option value="towels">Nya handdukar</option><option value="linen">Nya sängkläder</option><option value="food">Matbeställning (meddelande, ingen betalning)</option><option value="message">Meddelande till receptionen</option></select></label><label>Beskrivning<textarea id="notes" maxlength="1000" required></textarea></label><button>Skicka beställning</button></form><p id="msg" class="status"></p></section></main><footer>Igelkotts Hotel Hässleholm · Testversion</footer></body></html>

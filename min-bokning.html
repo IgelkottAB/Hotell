@@ -1,14 +1,1 @@
-
-<!doctype html>
-<html lang="sv">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Min bokning</title><link rel="stylesheet" href="style.css"></head>
-<body>
-<header class="topbar"><a href="index.html">🦔 Igelkotts Hotellkedja</a><a href="bokning.html">Boka rum</a></header>
-<main class="narrow"><section class="panel">
-<h1>Min bokning</h1>
-<p>Här ska gäster senare kunna hitta och hantera sina bokningar med en säker bokningskod och verifiering.</p>
-<p class="notice">Bokningsuppslagning är inte aktiverad ännu. Vi visar inga gästuppgifter på den här sidan.</p>
-<a class="button-link" href="bokning.html">Boka ett rum</a>
-</section><p><a href="index.html">← Startsidan</a></p></main>
-<footer>Testversion</footer>
-</body></html>
+<!doctype html><html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Min bokning – Igelkotts Hotellkedja</title><link rel="stylesheet" href="style.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/config.js"></script><script src="js/common.js"></script><script src="js/my-booking.js" defer></script></head><body><header><p>🦔 Igelkotts Hotellkedja</p><h1>Min bokning</h1><nav><a href="index.html">Boka rum</a><a href="min-bokning.html">Min bokning</a><a href="room-service.html">Rumsservice</a><a href="personal.html">Personal</a><a href="admin.html">Administration</a></nav></header><main><p class="notice">TESTSYSTEM – ingen riktig betalning eller verklig hotellverksamhet. Använd testuppgifter.</p><section><h2>Hitta bokning</h2><form id="lookup"><label>Bokningskod<input id="code" required autocomplete="off"></label><label>E-postadress<input id="email" type="email" required></label><button>Visa bokning</button></form><p id="msg" class="status"></p><div id="details" hidden><div id="info"></div><button id="cancel" class="danger">Avboka bokningen</button></div></section></main><footer>Igelkotts Hotel Hässleholm · Testversion</footer></body></html>
